@@ -237,17 +237,30 @@ namespace Dotnet.Integration.Test
         }
 
         internal CommandRunnerResult PackProject(string workingDirectory, string projectName, string args, string nuspecOutputPath = "obj", bool validateSuccess = true)
-            => PackProjectOrSolution(workingDirectory, $"{projectName}.csproj", args, nuspecOutputPath, validateSuccess);
+        {
+            // We can't provide empty or spaces as arguments if we used `string.IsNullOrEmpty` or `string.IsNullOrWhiteSpace`.
+            if (nuspecOutputPath != null)
+            {
+                args = $"{args} /p:NuspecOutputPath={nuspecOutputPath}";
+            }
+            return PackProjectOrSolution(workingDirectory, $"{projectName}.csproj", args, validateSuccess);
+        }
 
         internal CommandRunnerResult PackSolution(string workingDirectory, string solutionName, string args, string nuspecOutputPath = "obj", bool validateSuccess = true)
-            => PackProjectOrSolution(workingDirectory, $"{solutionName}.sln", args, nuspecOutputPath, validateSuccess);
+        {
+            if (nuspecOutputPath != null)
+            {
+                args = $"{args} /p:NuspecOutputPath={nuspecOutputPath}";
+            }
+            return PackProjectOrSolution(workingDirectory, $"{solutionName}.sln", args, validateSuccess);
+        }
 
-        private CommandRunnerResult PackProjectOrSolution(string workingDirectory, string file, string args, string nuspecOutputPath, bool validateSuccess)
+        private CommandRunnerResult PackProjectOrSolution(string workingDirectory, string file, string args, bool validateSuccess)
         {
 
             var result = CommandRunner.Run(TestDotnetCli,
                 workingDirectory,
-                $"pack {file} {args} /p:NuspecOutputPath={nuspecOutputPath}",
+                $"pack {file} {args}",
                 waitForExit: true,
                 environmentVariables: _processEnvVars);
             if (validateSuccess)

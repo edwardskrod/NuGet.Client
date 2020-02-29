@@ -4380,7 +4380,6 @@ namespace ClassLibrary
             projectBuilder
                 .WithProjectName("test")
                 .WithProperty("Authors", "Alice")
-                .WithProperty("PackageOutputPath", "bin\\Debug\\")
                 .WithProperty("NuspecFile", "test.nuspec")
                 .WithPackageIconUrl("https://test/icon.jpg");
 
