@@ -177,25 +177,25 @@ namespace Dotnet.Integration.Test
             return result;
         }
 
-        internal void RestoreProject(string workingDirectory, string projectName, string args)
-            => RestoreProjectOrSolution(workingDirectory, $"{projectName}.csproj", args);
+        internal void RestoreProject(string workingDirectory, string projectName, string args, bool validateSuccess = true)
+            => RestoreProjectOrSolution(workingDirectory, $"{projectName}.csproj", args, validateSuccess);
 
-        internal void RestoreSolution(string workingDirectory, string solutionName, string args)
-            => RestoreProjectOrSolution(workingDirectory, $"{solutionName}.sln", args);
+        internal void RestoreSolution(string workingDirectory, string solutionName, string args, bool validateSuccess = true)
+            => RestoreProjectOrSolution(workingDirectory, $"{solutionName}.sln", args, validateSuccess);
 
-        private void RestoreProjectOrSolution(string workingDirectory, string fileName, string args)
+        private void RestoreProjectOrSolution(string workingDirectory, string fileName, string args, bool validateSuccess)
         {
-
-            var envVar = new Dictionary<string, string>();
-            envVar.Add("MSBuildSDKsPath", MsBuildSdksPath);
 
             var result = CommandRunner.Run(TestDotnetCli,
                 workingDirectory,
                 $"restore {fileName} {args}",
                 waitForExit: true,
                 environmentVariables: _processEnvVars);
-            Assert.True(result.Item1 == 0, $"Restore failed with following log information :\n {result.AllOutput}");
-            Assert.True(result.Item3 == "", $"Restore failed with following message in error stream :\n {result.AllOutput}");
+            if (validateSuccess)
+            {
+                Assert.True(result.Item1 == 0, $"Restore failed with following log information :\n {result.AllOutput}");
+                Assert.True(result.Item3 == "", $"Restore failed with following message in error stream :\n {result.AllOutput}");
+            }
         }
 
         /// <summary>
@@ -271,16 +271,37 @@ namespace Dotnet.Integration.Test
             return result;
         }
 
-        internal void BuildProject(string workingDirectory, string projectName, string args)
+        internal void BuildProject(string workingDirectory, string projectName, string args, bool? appendRidToOutputPath = false, bool validateSuccess = true)
+        {
+            if (appendRidToOutputPath != null)
+            {
+                args = $"{args} /p:AppendRuntimeIdentifierToOutputPath={appendRidToOutputPath}";
+            }
+            BuildProjectOrSolution(workingDirectory, $"{projectName}.csproj", args, validateSuccess);
+        }
+
+        internal void BuildSolution(string workingDirectory, string solutionName, string args, bool? appendRidToOutputPath = false, bool validateSuccess = true)
+        {
+            if (appendRidToOutputPath != null)
+            {
+                args = $"{args} /p:AppendRuntimeIdentifierToOutputPath={appendRidToOutputPath}";
+            }
+            BuildProjectOrSolution(workingDirectory, $"{solutionName}.sln", args, validateSuccess);
+        }
+
+        private void BuildProjectOrSolution(string workingDirectory, string file, string args, bool validateSuccess)
         {
 
             var result = CommandRunner.Run(TestDotnetCli,
                 workingDirectory,
-                $"msbuild {projectName}.csproj {args} /p:AppendRuntimeIdentifierToOutputPath=false",
+                $"msbuild {file} {args}",
                 waitForExit: true,
                 environmentVariables: _processEnvVars);
-            Assert.True(result.Item1 == 0, $"Build failed with following log information :\n {result.AllOutput}");
-            Assert.True(result.Item3 == "", $"Build failed with following message in error stream :\n {result.AllOutput}");
+            if (validateSuccess)
+            {
+                Assert.True(result.Item1 == 0, $"Build failed with following log information :\n {result.AllOutput}");
+                Assert.True(result.Item3 == "", $"Build failed with following message in error stream :\n {result.AllOutput}");
+            }
         }
 
         internal TestDirectory CreateTestDirectory()
