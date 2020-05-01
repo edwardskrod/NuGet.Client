@@ -64,7 +64,9 @@ Copyright (c) .NET Foundation. All rights reserved.
 
   <PropertyGroup>
     <RestoreOutputPath Condition="'$(RestoreOutputPath)' == ''">$(MSBuildProjectExtensionsPath)</RestoreOutputPath>
-    <PackageOutputPath Condition="'$(PackageOutputPath)' == ''">$(BaseOutputPath)$(Configuration)\</PackageOutputPath>
+    <!-- Older versions of Common targets does not have 'BaseOutputPath' and thus we use 'OutputPath' as a fallback to maintain compatibility -->
+    <PackageOutputPath Condition="'$(PackageOutputPath)' == '' AND '$(BaseOutputPath)' == ''">$(OutputPath)</PackageOutputPath>
+    <PackageOutputPath Condition="'$(PackageOutputPath)' == '' AND '$(BaseOutputPath)' != ''">$(BaseOutputPath)$(Configuration)\</PackageOutputPath>
     <NuspecOutputPath Condition="'$(NuspecOutputPath)' == ''">$(BaseIntermediateOutputPath)$(Configuration)\</NuspecOutputPath>
   </PropertyGroup>
 
