@@ -36,11 +36,10 @@ namespace Dotnet.Integration.Test
                 var workingDirectory = Path.Combine(testDirectory, projectName);
                 var source = workingDirectory;
                 var rid = "win-x86";
-                var packages = new List<PackageIdentity>();
 
                 _msbuildFixture.CreateDotnetToolProject(solutionRoot: testDirectory.Path,
                     projectName: projectName, targetFramework: tfm, rid: rid,
-                    source: workingDirectory, packages: packages);
+                    packageSource: workingDirectory);
                 // Act
                 var result = _msbuildFixture.RestoreToolProject(workingDirectory, projectName, string.Empty);
 
@@ -65,7 +64,7 @@ namespace Dotnet.Integration.Test
 
                 _msbuildFixture.CreateDotnetToolProject(solutionRoot: testDirectory.Path,
                     projectName: projectName, targetFramework: tfm, rid: rid,
-                    source: source, packages: packages);
+                    packageSource: source, packages: packages);
 
                 // Act
                 var result = _msbuildFixture.RestoreToolProject(workingDirectory, projectName, string.Empty);
@@ -103,7 +102,7 @@ namespace Dotnet.Integration.Test
 
                 _msbuildFixture.CreateDotnetToolProject(solutionRoot: testDirectory.Path,
                     projectName: projectName, targetFramework: tfm, rid: rid,
-                    source: source, packages: packages);
+                    packageSource: source, packages: packages);
 
                 // Act
                 var result = _msbuildFixture.RestoreToolProject(workingDirectory, projectName, string.Empty);
@@ -150,7 +149,7 @@ namespace Dotnet.Integration.Test
 
                 _msbuildFixture.CreateDotnetToolProject(solutionRoot: testDirectory.Path,
                     projectName: projectName, targetFramework: tfm, rid: projectRID,
-                    source: source, packages: packages);
+                    packageSource: source, packages: packages);
 
                 // Act
                 var result = _msbuildFixture.RestoreToolProject(workingDirectory, projectName, string.Empty);
@@ -188,7 +187,7 @@ namespace Dotnet.Integration.Test
 
                 _msbuildFixture.CreateDotnetToolProject(solutionRoot: testDirectory.Path,
                     projectName: projectName, targetFramework: tfm, rid: rid,
-                    source: source, packages: packages);
+                    packageSource: source, packages: packages);
 
                 // Act
                 var result = _msbuildFixture.RestoreToolProject(workingDirectory, projectName, string.Empty);
@@ -236,7 +235,7 @@ namespace Dotnet.Integration.Test
 
                 _msbuildFixture.CreateDotnetToolProject(solutionRoot: testDirectory.Path,
                     projectName: projectName, targetFramework: tfm, rid: projectRID,
-                    source: source, packages: packages);
+                    packageSource: source, packages: packages);
 
                 // Act
                 var result = _msbuildFixture.RestoreToolProject(workingDirectory, projectName, string.Empty);
@@ -288,7 +287,7 @@ namespace Dotnet.Integration.Test
 
                 _msbuildFixture.CreateDotnetToolProject(solutionRoot: testDirectory.Path,
                     projectName: projectName, targetFramework: tfm, rid: rid,
-                    source: source, packages: packages);
+                    packageSource: source, packages: packages);
 
                 // Act
                 var result = _msbuildFixture.RestoreToolProject(workingDirectory, projectName, string.Empty);
@@ -338,7 +337,7 @@ namespace Dotnet.Integration.Test
                 };
                 _msbuildFixture.CreateDotnetToolProject(solutionRoot: testDirectory.Path,
                     projectName: projectName, targetFramework: tfm, rid: projectRid,
-                    source: localSource, packages: packages);
+                    packageSource: localSource, packages: packages);
 
                 // Act
                 var result = _msbuildFixture.RestoreToolProject(workingDirectory, projectName, string.Empty);
@@ -385,7 +384,7 @@ namespace Dotnet.Integration.Test
 
                 _msbuildFixture.CreateDotnetToolProject(solutionRoot: testDirectory.Path,
                     projectName: projectName, targetFramework: tfm, rid: rid,
-                    source: source, packages: packages);
+                    packageSource: source, packages: packages);
 
                 // Act
                 var result = _msbuildFixture.RestoreToolProject(workingDirectory, projectName, string.Empty);
@@ -420,7 +419,7 @@ namespace Dotnet.Integration.Test
 
                 _msbuildFixture.CreateDotnetToolProject(solutionRoot: testDirectory.Path,
                     projectName: projectName, targetFramework: tfm, rid: rid,
-                    source: source, packages: packages);
+                    packageSource: source, packages: packages);
 
                 // Act
                 var result = _msbuildFixture.RestoreToolProject(workingDirectory, projectName, string.Empty);
@@ -457,7 +456,7 @@ namespace Dotnet.Integration.Test
 
                 _msbuildFixture.CreateDotnetToolProject(solutionRoot: testDirectory.Path,
                     projectName: projectName, targetFramework: tfm, rid: rid,
-                    source: source, packages: packages);
+                    packageSource: source, packages: packages);
 
                 // Act
                 var result = _msbuildFixture.RestoreToolProject(workingDirectory, projectName, string.Empty);
@@ -511,7 +510,7 @@ namespace Dotnet.Integration.Test
 
                 _msbuildFixture.CreateDotnetToolProject(solutionRoot: testDirectory.Path,
                     projectName: projectName, targetFramework: tfm, rid: rid,
-                    source: source, packages: packages);
+                    packageSource: source, packages: packages);
 
                 var fullProjectPath = Path.Combine(workingDirectory, $"{projectName}.csproj");
                 MakePackageReferenceImplicitlyDefined(fullProjectPath, autoReferencePackageName);
@@ -565,7 +564,7 @@ namespace Dotnet.Integration.Test
 
                 _msbuildFixture.CreateDotnetToolProject(solutionRoot: testDirectory.Path,
                     projectName: projectName, targetFramework: tfm, rid: rid,
-                    source: source, packages: packages);
+                    packageSource: source, packages: packages);
 
                 var fullProjectPath = Path.Combine(workingDirectory, $"{projectName}.csproj");
                 MakePackageReferenceImplicitlyDefined(fullProjectPath, autoReferencePackageName);
@@ -617,7 +616,7 @@ namespace Dotnet.Integration.Test
 
                 _msbuildFixture.CreateDotnetToolProject(solutionRoot: testDirectory.Path,
                     projectName: projectName, targetFramework: tfm, rid: rid,
-                    source: source, packages: packages);
+                    packageSource: source, packages: packages);
 
                 var fullProjectPath = Path.Combine(workingDirectory, $"{projectName}.csproj");
                 MakePackageReferenceImplicitlyDefined(fullProjectPath, autoReferencePackageName);
@@ -675,7 +674,7 @@ namespace Dotnet.Integration.Test
 
                 _msbuildFixture.CreateDotnetToolProject(solutionRoot: testDirectory.Path,
                     projectName: projectName, targetFramework: tfm, rid: rid,
-                    source: source, packages: packages);
+                    packageSource: source, packages: packages);
 
                 var fullProjectPath = Path.Combine(workingDirectory, $"{projectName}.csproj");
                 MakePackageReferenceImplicitlyDefined(fullProjectPath, autoReferencePackageName);
