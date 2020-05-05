@@ -698,11 +698,11 @@ namespace Dotnet.Integration.Test
 
         private static void MakePackageReferenceImplicitlyDefined(string fullProjectPath, string packageName)
         {
-            var searchString = $"\"{packageName}\" ";
+            var searchString = $"'{packageName}' ";
             var text = File.ReadAllText(fullProjectPath);
 
             var referenceElement = text.IndexOf(searchString) + searchString.Length;
-            text = text.Substring(0, referenceElement) + " IsImplicitlyDefined=\"true\" " + text.Substring(referenceElement);
+            text = text.Substring(0, referenceElement) + " IsImplicitlyDefined='true' " + text.Substring(referenceElement);
             File.WriteAllText(fullProjectPath, text);
         }
 

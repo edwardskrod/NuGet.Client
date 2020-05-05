@@ -23,6 +23,18 @@ using Xunit;
 
 namespace Dotnet.Integration.Test
 {
+    public enum MSBuildProjectStyle
+    {
+        SdkStyle,
+        NonSdkStyle
+    }
+
+    internal enum MSBuildProjectType
+    {
+        Console,
+        ClassLibrary
+    }
+
     public class MsbuildIntegrationTestFixture : IDisposable
     {
         private readonly TestDirectory _cliDirectory;
@@ -68,6 +80,133 @@ namespace Dotnet.Integration.Test
             _processEnvVars.Add("UseSharedCompilation", "false");
             _processEnvVars.Add("DOTNET_MULTILEVEL_LOOKUP", "0");
             _processEnvVars.Add("MSBUILDDISABLENODEREUSE ", "true");
+        }
+
+        internal void CreateNewProject(string path, string projectName, MSBuildProjectStyle projectStyle, MSBuildProjectType projectType)
+        {
+            switch (projectStyle)
+            {
+                case MSBuildProjectStyle.SdkStyle:
+                    CreateDotnetNewProject(path, projectName, projectType);
+                    break;
+                case MSBuildProjectStyle.NonSdkStyle:
+                    CreateNetFxNewProject(path, projectName, projectType);
+                    break;
+                default:
+                    throw new NotSupportedException($"Please specify the correct ProjectStyle. Currently {projectStyle} is not implemented/supported.");
+            }
+        }
+
+        private void CreateNetFxNewProject(string solutionRoot, string projectName, MSBuildProjectType projectType)
+        {
+            string outputType;
+            switch (projectType)
+            {
+                case MSBuildProjectType.Console:
+                    outputType = "Exe";
+                    break;
+                case MSBuildProjectType.ClassLibrary:
+                    outputType = "Library";
+                    break;
+                default:
+                    outputType = "Exe";
+                    break;
+            }
+            CreateNetFxNewProject(solutionRoot, projectName, outputType);
+        }
+
+        internal void CreateNetFxNewProject(string solutionRoot, string projectName, string outputType = "Exe", string packageSource = null, IEnumerable<PackageIdentity> packages = null)
+        {
+            var workingDirectory = Path.Combine(solutionRoot, projectName);
+            if (!Directory.Exists(workingDirectory))
+            {
+                Directory.CreateDirectory(workingDirectory);
+            }
+
+            var projectFileName = Path.Combine(workingDirectory, projectName + ".csproj");
+            var sourceCodeFileName = Path.Combine(workingDirectory, "Code.cs");
+
+            packageSource = packageSource ?? string.Empty;
+            var restorePackagesPath = Path.Combine(workingDirectory, "tools", "packages");
+            var restoreSolutionDirectory = workingDirectory;
+            var msbuildProjectExtensionsPath = Path.Combine(workingDirectory);
+            var packageReferences = string.Empty;
+
+            if (packages != null)
+            {
+                packageReferences = string.Join(Environment.NewLine, packages.Select(p => $"<PackageReference Include='{p.Id}' Version='{p.Version}'/>"));
+            }
+
+            var projectFile = $@"<Project ToolsVersion='15.0' DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+    <PropertyGroup>
+        <OutputPath>bin\Debug</OutputPath>
+        <OutputType>{outputType}</OutputType>
+        <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+        <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+        <!-- Things that do change -->
+        <RestoreSources>{packageSource}</RestoreSources>
+        <RestorePackagesPath>{restorePackagesPath}</RestorePackagesPath>
+        <RestoreSolutionDirectory>{restoreSolutionDirectory}</RestoreSolutionDirectory>
+        <MSBuildProjectExtensionsPath>{msbuildProjectExtensionsPath}</MSBuildProjectExtensionsPath>
+        <!--Things that don't change -->
+        <RestoreAdditionalProjectSources/>
+        <RestoreAdditionalProjectFallbackFolders/>
+        <RestoreAdditionalProjectFallbackFoldersExcludes/>
+        <RestoreFallbackFolders>clear</RestoreFallbackFolders>
+        <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    </PropertyGroup>
+    <ItemGroup>
+        <Compile Include='Code.cs'/>
+        {packageReferences}
+    </ItemGroup>
+    <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets'/>
+    <PropertyGroup>
+        <Authors>.NET CI, NuGet CI</Authors>
+        <PackageVersion>1.0.0.0</PackageVersion>
+        <PackageDescription>A Test Package with NETFX Libs made with Non-Sdk Style project.</PackageDescription>
+    </PropertyGroup>
+    <!-- Import it via 'MSBuildSDKsPath' for local testing -->
+    <Import Project='$(MSBuildSDKsPath)\NuGet.Build.Tasks.Pack\build\NuGet.Build.Tasks.Pack.targets'/>
+</Project>";
+
+            var sourceCodeFile = @"using System;
+namespace Sample
+{
+    public static class Program
+    {
+        public static void Main() { }
+    }
+}";
+
+            try
+            {
+                File.WriteAllText(projectFileName, projectFile);
+                File.WriteAllText(sourceCodeFileName, sourceCodeFile);
+            }
+            catch
+            {
+                // ignore
+            }
+            Assert.True(File.Exists(projectFileName));
+            Assert.True(File.Exists(sourceCodeFileName));
+        }
+
+        private void CreateDotnetNewProject(string solutionRoot, string projectName, MSBuildProjectType projectType)
+        {
+            string projectTypeArg;
+            switch (projectType)
+            {
+                case MSBuildProjectType.Console:
+                    projectTypeArg = "console";
+                    break;
+                case MSBuildProjectType.ClassLibrary:
+                    projectTypeArg = "classlib";
+                    break;
+                default:
+                    projectTypeArg = "console";
+                    break;
+            }
+            CreateDotnetNewProject(solutionRoot, projectName, projectTypeArg);
         }
 
         /// <summary>

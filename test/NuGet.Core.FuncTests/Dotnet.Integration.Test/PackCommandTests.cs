@@ -28,8 +28,10 @@ namespace Dotnet.Integration.Test
             msbuildFixture = fixture;
         }
 
-        [PlatformFact(Platform.Windows)]
-        public void PackCommand_NewProject_OutputsInDefaultPaths()
+        [PlatformTheory(Platform.Windows)]
+        [InlineData(MSBuildProjectStyle.SdkStyle)]
+        [InlineData(MSBuildProjectStyle.NonSdkStyle)]
+        public void PackCommand_NewProject_OutputsInDefaultPaths(MSBuildProjectStyle projectStyle)
         {
             // Arrange
             using (var testDirectory = TestDirectory.Create())
@@ -40,7 +42,7 @@ namespace Dotnet.Integration.Test
                 var nuspecPath = Path.Combine(workingDirectory, @"obj\Debug", $"{projectName}.1.0.0.nuspec");
 
                 // Act
-                msbuildFixture.CreateDotnetNewProject(testDirectory.Path, projectName, "classlib");
+                msbuildFixture.CreateNewProject(testDirectory.Path, projectName, projectStyle, MSBuildProjectType.ClassLibrary);
                 msbuildFixture.PackProject(workingDirectory, projectName, string.Empty, null);
 
                 // Assert
@@ -49,8 +51,10 @@ namespace Dotnet.Integration.Test
             }
         }
 
-        [PlatformFact(Platform.Windows)]
-        public void PackCommand_NewProject_ContinuousOutputInBothDefaultAndCustomPaths()
+        [PlatformTheory(Platform.Windows)]
+        [InlineData(MSBuildProjectStyle.SdkStyle)]
+        [InlineData(MSBuildProjectStyle.NonSdkStyle)]
+        public void PackCommand_NewProject_ContinuousOutputInBothDefaultAndCustomPaths(MSBuildProjectStyle projectStyle)
         {
             // Arrange
             using (var testDirectory = TestDirectory.Create())
@@ -58,7 +62,7 @@ namespace Dotnet.Integration.Test
                 var projectName = "ClassLibrary1";
                 var workingDirectory = Path.Combine(testDirectory, projectName);
 
-                msbuildFixture.CreateDotnetNewProject(testDirectory.Path, projectName, "classlib");
+                msbuildFixture.CreateNewProject(testDirectory.Path, projectName, projectStyle, MSBuildProjectType.ClassLibrary);
                 msbuildFixture.RestoreProject(workingDirectory, projectName, string.Empty);
                 msbuildFixture.BuildProject(workingDirectory, projectName, string.Empty);
 
