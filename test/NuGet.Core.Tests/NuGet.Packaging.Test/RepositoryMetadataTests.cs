@@ -1,7 +1,6 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
-using System;
 using NuGet.Packaging.Core;
 using Xunit;
 
@@ -46,27 +45,27 @@ namespace NuGet.Packaging.Test
                 return new TheoryData<RepositoryMetadata, RepositoryMetadata, bool>
                 {
                     { template, template, true },
-                    { new RepositoryMetadata(), new RepositoryMetadata(), true },
-                    { new RepositoryMetadata("type", "url", "branch", "commit"), template, true },
-                    { new RepositoryMetadata("TYPE", "url", "branch", "commit"), template, true },
-                    { new RepositoryMetadata("faketype", "url", "branch", "commit"), template, false },
-                    { new RepositoryMetadata("TYPE", "fakeurl", "branch", "commit"), template, false },
-                    { new RepositoryMetadata("TYPE", "url", "fakebranch", "commit"), template, false },
-                    { new RepositoryMetadata("TYPE", "url", "branch", "fakecommit"), template, false },
-                    { new RepositoryMetadata("TYPE", null, "branch", "fakecommit"), template, false },
-                    { new RepositoryMetadata("TYPE", "url", null, "commit"), template, false },
-                    { new RepositoryMetadata("TYPE", "url", "branch", null), template, false },
-                    { template, new RepositoryMetadata(null, "url", "branch", null), false },
                     { template, null, false },
                     { null, template, false },
+                    { new RepositoryMetadata(), new RepositoryMetadata(), true },
+                    { new RepositoryMetadata("type", "url", "branch", "commit"), template, true },
+
+                    { new RepositoryMetadata("TYPE", "url", "branch", "commit"), template, true },
+                    { new RepositoryMetadata("type", "URL", "branch", "commit"), template, false },
+                    { new RepositoryMetadata("type", "url", "BRANCH", "commit"), template, false },
+                    { new RepositoryMetadata("type", "url", "branch", "COMMIT"), template, false },
+
+                    { new RepositoryMetadata("faketype", "url", "branch", "commit"), template, false },
+                    { new RepositoryMetadata("type", "fakeurl", "branch", "commit"), template, false },
+                    { new RepositoryMetadata("type", "url", "fakebranch", "commit"), template, false },
+                    { new RepositoryMetadata("type", "url", "branch", "fakecommit"), template, false },
+
+                    { new RepositoryMetadata(null, "url", "branch", "commit"), template, false },
+                    { new RepositoryMetadata("type", null, "branch", "commit"), template, false },
+                    { new RepositoryMetadata("type", "url", null, "commit"), template, false },
+                    { new RepositoryMetadata("type", "url", "branch", null), template, false },
                 };
             }
-        }
-
-        [Fact]
-        public void RepositoryMetadataEqualsThrows()
-        {
-            Assert.Throws<NullReferenceException>(() => new RepositoryMetadata(null, "url", "branch", "fakecommit") == new RepositoryMetadata());
         }
     }
 }

@@ -10,7 +10,7 @@ namespace NuGet.Packaging.Core
     {
         public RepositoryMetadata()
         {
-            
+
         }
         public RepositoryMetadata(string type, string url, string branch, string commit)
         {
@@ -66,7 +66,7 @@ namespace NuGet.Packaging.Core
             }
 
             return
-                Type.Equals(other.Type, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(Type, other.Type, StringComparison.OrdinalIgnoreCase) &&
                 Url == other.Url &&
                 Branch == other.Branch &&
                 Commit == other.Commit;
