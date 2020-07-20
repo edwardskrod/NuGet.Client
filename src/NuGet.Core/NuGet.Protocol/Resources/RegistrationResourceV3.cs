@@ -48,12 +48,12 @@ namespace NuGet.Protocol
         /// </summary>
         public virtual Uri GetUri(string packageId)
         {
-            if (String.IsNullOrEmpty(packageId))
+            if (string.IsNullOrEmpty(packageId))
             {
                 throw new InvalidOperationException();
             }
 
-            return new Uri(String.Format(CultureInfo.InvariantCulture, "{0}/{1}/index.json",
+            return new Uri(string.Format(CultureInfo.InvariantCulture, "{0}/{1}/index.json",
                 BaseUri.AbsoluteUri.TrimEnd('/'), packageId.ToLowerInvariant()));
         }
 
@@ -62,7 +62,7 @@ namespace NuGet.Protocol
         /// </summary>
         public virtual Uri GetUri(string id, NuGetVersion version)
         {
-            if (String.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(id))
             {
                 throw new ArgumentException(Strings.ArgumentCannotBeNullOrEmpty, nameof(id));
             }
@@ -87,7 +87,7 @@ namespace NuGet.Protocol
                 throw new InvalidOperationException();
             }
 
-            return new Uri(String.Format(CultureInfo.InvariantCulture, "{0}/{1}/{2}.json", BaseUri.AbsoluteUri.TrimEnd('/'),
+            return new Uri(string.Format(CultureInfo.InvariantCulture, "{0}/{1}/{2}.json", BaseUri.AbsoluteUri.TrimEnd('/'),
                 package.Id.ToLowerInvariant(), package.Version.ToNormalizedString().ToLowerInvariant()));
         }
 

@@ -37,6 +37,7 @@ namespace NuGet.Protocol.Core.Types
 
         LicenseMetadata LicenseMetadata { get; }
         Task<PackageDeprecationMetadata> GetDeprecationMetadataAsync();
+        Task<IEnumerable<PackageVulnerabilityMetadata>> GetVulnerabilityMetadataAsync();
         Task<IEnumerable<VersionInfo>> GetVersionsAsync();
     }
 }

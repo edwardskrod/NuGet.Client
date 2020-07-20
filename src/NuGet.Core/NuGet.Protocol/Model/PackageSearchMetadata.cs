@@ -206,5 +206,23 @@ namespace NuGet.Protocol
         public PackageDeprecationMetadata DeprecationMetadata { get; private set; }
 
         public Task<PackageDeprecationMetadata> GetDeprecationMetadataAsync() => Task.FromResult(DeprecationMetadata);
+        /*        public Task<PackageDeprecationMetadata> GetDeprecationMetadataAsync() => Task.FromResult(new PackageDeprecationMetadata()
+                {
+                    Message = "deprecation foo.package1",
+                    Reasons = new List<string>() { "bar 1", "bar 2"},
+                    AlternatePackage = new AlternatePackageMetadata()
+                    {
+                        PackageId = "Foo.Package1",
+                        Range = new VersionRange(new NuGetVersion(1,5,5))
+                    }
+                });*/
+
+        /// <summary>
+        /// If vulnerability advisory is current, contains vulnerability information for this package; otherwise <c>null</c>.
+        /// </summary>
+        [JsonProperty(PropertyName = JsonProperties.Vulnerabilities)]
+        public IEnumerable<PackageVulnerabilityMetadata> VulnerabilityMetadata { get; private set; }
+
+        public Task<IEnumerable<PackageVulnerabilityMetadata>> GetVulnerabilityMetadataAsync() => Task.FromResult(VulnerabilityMetadata);
     }
 }
