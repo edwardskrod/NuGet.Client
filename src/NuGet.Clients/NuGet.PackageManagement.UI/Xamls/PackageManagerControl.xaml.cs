@@ -826,18 +826,7 @@ namespace NuGet.PackageManagement.UI
                 // start SearchAsync task for initial loading of packages
                 var searchResultTask = loader.SearchAsync(continuationToken: null, cancellationToken: _loadCts.Token);
                 // this will wait for searchResultTask to complete instead of creating a new task
-                await _packageList.LoadItemsAsync(loader, loadingMessage, _uiLogger, searchResultTask, _loadCts.Token)
-                    .ContinueWith((t) =>
-                    {
-                        FlagTabDataAsLoaded(filterToRender);
-
-                    // Loading Data on Installed tab should also consider the Data on Updates tab as loaded to indicate
-                    // UI filtering for Updates is ready.
-                    if (filterToRender == ItemFilter.Installed)
-                    {
-                        FlagTabDataAsLoaded(ItemFilter.UpdatesAvailable);
-                    }
-                }, TaskContinuationOptions.OnlyOnRanToCompletion);
+                await _packageList.LoadItemsAsync(loader, loadingMessage, _uiLogger, searchResultTask, _loadCts.Token);
 
                 if (pSearchCallback != null && searchTask != null)
                 {
@@ -849,6 +838,15 @@ namespace NuGet.PackageManagement.UI
                 if (!useCachedPackageMetadata)
                 {
                     RefreshInstalledAndUpdatesTabs();
+                }
+
+                FlagTabDataAsLoaded(filterToRender);
+
+                // Loading Data on Installed tab should also consider the Data on Updates tab as loaded to indicate
+                // UI filtering for Updates is ready.
+                if (filterToRender == ItemFilter.Installed)
+                {
+                    FlagTabDataAsLoaded(ItemFilter.UpdatesAvailable);
                 }
             }
             catch (OperationCanceledException)

@@ -228,9 +228,6 @@ namespace NuGet.PackageManagement.UI
             var loadCts = CancellationTokenSource.CreateLinkedTokenSource(token);
             Interlocked.Exchange(ref _loadCts, loadCts)?.Cancel();
 
-            //await _joinableTaskFactory.Value.RunAsync(
-            //    async() => await RepopulatePackageListAsync(selectedPackageItem, _loader, loadCts)
-            //);
             await RepopulatePackageListAsync(selectedPackageItem, _loader, loadCts);
         }
 
