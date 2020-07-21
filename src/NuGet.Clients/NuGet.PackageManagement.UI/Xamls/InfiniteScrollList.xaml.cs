@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Threading;
 using NuGet.Common;
@@ -296,6 +298,10 @@ namespace NuGet.PackageManagement.UI
                 _loadingStatusBar.SetError();
                 _loadingStatusBar.Visibility = Visibility.Visible;
             }
+            catch (OperationCanceledException)
+            {
+                OutputToConsoleWindow("OperationCanceledException in Repopulate");
+            }
             finally
             {
                 if (_loadingStatusIndicator.Status != LoadingStatus.NoItemsFound
@@ -307,11 +313,13 @@ namespace NuGet.PackageManagement.UI
                     var emptyListCount = addedLoadingIndicator ? 1 : 0;
                     if (Items.Count == emptyListCount)
                     {
+                        OutputToConsoleWindow("RepopulatePackageList setting NoItemsFound, Items = " + Items.Count);
                         _loadingStatusIndicator.Status = LoadingStatus.NoItemsFound;
                     }
                     else
                     {
                         Items.Remove(_loadingStatusIndicator);
+                        OutputToConsoleWindow("Removing loading indicator, Items = " + Items.Count);
                     }
                 }
             }
@@ -347,6 +355,7 @@ namespace NuGet.PackageManagement.UI
             }
             finally
             {
+                OutputToConsoleWindow("FilterItemsDone: LoadingStatus = " + _loadingStatusIndicator.Status + " FilterCount is " + FilteredItemsCount);
                 //If no items are shown in the filter, indicate in the list that no packages are found.
                 if (FilteredItemsCount == 0)
                 {
@@ -354,6 +363,7 @@ namespace NuGet.PackageManagement.UI
                 }
                 else
                 {
+                    //There are packages, but since no loading will occur, there's no need for an indicator.
                     if (Items.Contains(_loadingStatusIndicator))
                     {
                         Items.Remove(_loadingStatusIndicator);
@@ -364,6 +374,12 @@ namespace NuGet.PackageManagement.UI
             UpdateCheckBoxStatus();
 
             LoadItemsCompleted?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void OutputToConsoleWindow(string message)
+        {
+            var pmc = this.FindAncestor<PackageManagerControl>();
+            pmc?.WriteToOutputConsole("INFINITESCROLL: " + message);
         }
 
         private void ApplyUIFilterForUpdatesAvailable()
@@ -565,6 +581,7 @@ namespace NuGet.PackageManagement.UI
                     // add newly loaded items
                     foreach (var package in packages)
                     {
+                        //OutputToConsoleWindow($"Adding Package {package.Id} {package.Version}");// (update?: {package.IsUpdateAvailable})");
                         package.PropertyChanged += Package_PropertyChanged;
                         Items.Add(package);
                         _selectedCount = package.Selected ? _selectedCount + 1 : _selectedCount;
@@ -794,6 +811,11 @@ namespace NuGet.PackageManagement.UI
         public void ResetLoadingStatusIndicator()
         {
             _loadingStatusIndicator.Reset(string.Empty);
+        }
+
+        public LoadingStatus GetLoadingStatus()
+        {
+            return _loadingStatusIndicator.Status;
         }
     }
 }

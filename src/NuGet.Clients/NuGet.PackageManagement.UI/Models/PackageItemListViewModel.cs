@@ -16,6 +16,7 @@ using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Telemetry;
+using Task = System.Threading.Tasks.Task;
 
 namespace NuGet.PackageManagement.UI
 {
@@ -384,6 +385,11 @@ namespace NuGet.PackageManagement.UI
         private Lazy<Task<NuGetVersion>> _backgroundLatestVersionLoader;
         private Lazy<Task<PackageDeprecationMetadata>> _backgroundDeprecationMetadataLoader;
 
+        internal async Task WaitForBackgroundLatestVersionLoaderAsync()
+        {
+            await ReloadPackageVersionsAsync();
+        }
+
         private void TriggerStatusLoader()
         {
             if (!_backgroundLatestVersionLoader.IsValueCreated)
@@ -408,7 +414,7 @@ namespace NuGet.PackageManagement.UI
             }
         }
 
-        private async System.Threading.Tasks.Task ReloadPackageVersionsAsync()
+        private async Task ReloadPackageVersionsAsync()
         {
             var result = await _backgroundLatestVersionLoader.Value;
 
@@ -418,7 +424,7 @@ namespace NuGet.PackageManagement.UI
             Status = GetPackageStatus(LatestVersion, InstalledVersion, AutoReferenced);
         }
 
-        private async System.Threading.Tasks.Task ReloadPackageDeprecationAsync()
+        private async Task ReloadPackageDeprecationAsync()
         {
             var result = await _backgroundDeprecationMetadataLoader.Value;
 
@@ -427,7 +433,7 @@ namespace NuGet.PackageManagement.UI
             IsPackageDeprecated = result != null;
         }
 
-        private async System.Threading.Tasks.Task ReloadProvidersAsync()
+        private async Task ReloadProvidersAsync()
         {
             var result = await ProvidersLoader.Value;
 
