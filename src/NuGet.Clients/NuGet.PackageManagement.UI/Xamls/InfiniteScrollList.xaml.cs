@@ -80,6 +80,12 @@ namespace NuGet.PackageManagement.UI
 
             BindingOperations.EnableCollectionSynchronization(Items, _list.ItemsLock);
 
+            var cv = CollectionViewSource.GetDefaultView(Items) as ListCollectionView;
+            //Enables UI filtering to automatically refresh on property changes.
+            cv.IsLiveFiltering = true;
+            //Bindable properties that are loaded async need to trigger a UI refresh once loaded.
+            cv.LiveFilteringProperties.Add("IsUpdateAvailable");
+
             DataContext = Items;
             CheckBoxesEnabled = false;
 
