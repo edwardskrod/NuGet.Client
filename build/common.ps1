@@ -167,7 +167,7 @@ Function Install-DotnetCLI {
     )
     $vsMajorVersion = Get-VSMajorVersion
     $MSBuildExe = Get-MSBuildExe $vsMajorVersion
-    $CliBranchListForTesting = & $msbuildExe $NuGetClientRoot\build\config.props /v:m /nologo /t:GetCliBranchForTesting
+    $CliBranchListForTesting = & $msbuildExe $NuGetClientRoot\build\config.props -noAutoRsp -v:m -nologo -t:GetCliBranchForTesting
     $CliBranchList = $CliBranchListForTesting.Split(';');
 
     $DotNetInstall = Join-Path $CLIRoot 'dotnet-install.ps1'
@@ -175,44 +175,37 @@ Function Install-DotnetCLI {
     #If "-force" is specified, or dotnet.exe under cli folder doesn't exist, create cli folder and download dotnet-install.ps1 into cli folder.
     if ($Force -or -not (Test-Path $DotNetExe)) {
         Trace-Log "Downloading .NET CLI $CliBranchForTesting"
-
         New-Item -ItemType Directory -Force -Path $CLIRoot | Out-Null
-
         Invoke-WebRequest 'https://raw.githubusercontent.com/dotnet/cli/master/scripts/obtain/dotnet-install.ps1' -OutFile $DotNetInstall
     }
 
+    $DotNetExe = Join-Path $CLIRoot 'dotnet.exe';
+
+    if ([Environment]::Is64BitOperatingSystem) {
+        $arch = "x64";
+    }
+    else {
+        $arch = "x86";
+    }
+
+    $env:DOTNET_HOME = $CLIRoot
+    $env:DOTNET_INSTALL_DIR = $NuGetClientRoot
+
+
     ForEach ($CliBranch in $CliBranchList) {
-        $CliBranch = $CliBranch.trim()
+        $CliBranch = $CliBranch.Trim()
         $CliChannelAndVersion = $CliBranch -split "\s+"
 
-        $Channel = $CliChannelAndVersion[0].trim()
+        $Channel = $CliChannelAndVersion[0].Trim()
         if ($CliChannelAndVersion.count -eq 1) {
             $Version = 'latest'
         }
         else {
-            $Version = $CliChannelAndVersion[1].trim()
+            $Version = $CliChannelAndVersion[1].Trim()
         }
-
-        $cli = @{
-            Root    = $CLIRoot
-            Version = $Version
-            Channel = $Channel
-        }
-    
-        $DotNetExe = Join-Path $cli.Root 'dotnet.exe';
-
-        if ([Environment]::Is64BitOperatingSystem) {
-            $arch = "x64";
-        }
-        else {
-            $arch = "x86";
-        }
-
-        $env:DOTNET_HOME = $cli.Root
-        $env:DOTNET_INSTALL_DIR = $NuGetClientRoot
 
         if ($Version -eq 'latest') {
-            #Get the latest specific version number for a certain channel from url like : https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/3.0.1xx/latest.version"
+            #Get the latest specific version number for a certain channel from url like : https://dotnetcli.blob.core.windows.net/dotnet/Sdk/release/3.1.1xx/latest.version"
             $httpGetUrl = "https://dotnetcli.blob.core.windows.net/dotnet/Sdk/" + $Channel + "/latest.version"
             $versionFile = Invoke-RestMethod -Method Get -Uri $httpGetUrl
 
@@ -220,7 +213,7 @@ Function Install-DotnetCLI {
             [int]$count = 0
             while ( $line = $stringReader.ReadLine() ) {
                 if ($count -eq 1) {
-                    $specificVersion = $line.trim()
+                    $specificVersion = $line.Trim()
                 }
                 $count += 1
             }
@@ -228,16 +221,16 @@ Function Install-DotnetCLI {
         else {
             $specificVersion = $Version
         }
-        
+
         Trace-Log "The version of SDK should be installed is : $specificVersion"
 
-        $probeDotnetPath = Join-Path (Join-Path $cli.Root sdk)  $specificVersion
+        $probeDotnetPath = Join-Path $CLIRoot "sdk\$specificVersion"
 
         Trace-Log "Probing folder : $probeDotnetPath"
 
-        #If "-force" is specified, or folder with specific version doesn't exist, the download command will run" 
+        #If "-force" is specified, or folder with specific version doesn't exist, the download command will run"
         if ($Force -or -not (Test-Path $probeDotnetPath)) {
-            & $DotNetInstall -Channel $cli.Channel -i $cli.Root -Version $cli.Version -Architecture $arch -NoPath
+            & $DotNetInstall -Channel $Channel -i $CLIRoot -Version $Version -Architecture $arch -NoPath
         }
 
         if (-not (Test-Path $DotNetExe)) {
@@ -251,9 +244,14 @@ Function Install-DotnetCLI {
         & $DotNetExe --info
     }
 
-    # Install the 2.x runtime because our tests target netcoreapp2x
-    Trace-Log "$DotNetInstall -Runtime dotnet -Channel 2.2 -i $CLIRoot -NoPath"
-    & $DotNetInstall -Runtime dotnet -Channel 2.2 -i $CLIRoot -NoPath
+    # Install the 3.1 runtime because our tests target netcoreapp3.1
+    Trace-Log "$DotNetInstall -Runtime dotnet -Channel 3.1 -i $CLIRoot -NoPath"
+    & $DotNetInstall -Runtime dotnet -Channel 3.1 -i $CLIRoot -NoPath
+
+    # Install the 2.1 runtime because our XPlat targets netcoreapp2.1
+    Trace-Log "$DotNetInstall -Runtime dotnet -Channel 2.1 -i $CLIRoot -NoPath"
+    & $DotNetInstall -Runtime dotnet -Channel 2.1 -i $CLIRoot -NoPath
+
     # Display build info
     & $DotNetExe --info
 }
