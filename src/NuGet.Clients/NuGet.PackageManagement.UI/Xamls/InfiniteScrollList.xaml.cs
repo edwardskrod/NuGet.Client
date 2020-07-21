@@ -84,8 +84,9 @@ namespace NuGet.PackageManagement.UI
             //Enables UI filtering to automatically refresh on property changes.
             cv.IsLiveFiltering = true;
             //Bindable properties that are loaded async need to trigger a UI refresh once loaded.
+            cv.LiveFilteringProperties.Add("Status");
+            cv.LiveFilteringProperties.Add("LatestVersion");
             cv.LiveFilteringProperties.Add("IsUpdateAvailable");
-
             DataContext = Items;
             CheckBoxesEnabled = false;
 
